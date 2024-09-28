@@ -18,6 +18,7 @@ Pacman agents (in searchAgents.py).
 """
 
 import util
+import copy
 
 class SearchProblem:
     """
@@ -72,6 +73,8 @@ def tinyMazeSearch(problem):
     w = Directions.WEST
     return  [s, s, w, s, w, w, s, w]
 
+# python autograder.py -q q1
+
 def depthFirstSearch(problem: SearchProblem):
     """
     Search the deepest nodes in the search tree first.
@@ -86,14 +89,52 @@ def depthFirstSearch(problem: SearchProblem):
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    def addState(stk: util.Stack, vis: dict, state: list):
+        stk.push(state)
+        vis[state[0]] = True
 
+    fringe = util.Stack()
+    closed = {}
+    state = [problem.getStartState(), []]
+    addState(fringe, closed, copy.deepcopy(state))
+    ok = False
+    while (fringe.isEmpty() == False and ok == False):
+        state, actions = fringe.pop()
+        for next_state, action, _ in problem.getSuccessors(state):
+            next_actions = actions + [action]
+            if problem.isGoalState(next_state):
+                ans = next_actions
+                ok = True
+            elif next_state not in closed:
+                state = [next_state, next_actions]
+                addState(fringe, closed, copy.deepcopy(state))
+    return ans
+
+# python pacman.py -l mediumMaze -p SearchAgent -a fn=bfs
 def breadthFirstSearch(problem: SearchProblem):
     """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    def addState(que: util.Queue, vis: dict, state: list):
+        que.push(state)
+        vis[state[0]] = True
 
+    fringe = util.Queue()
+    closed = {}
+    state = [problem.getStartState(), []]
+    addState(fringe, closed, copy.deepcopy(state))
+    ok = False
+    while (fringe.isEmpty() == False and ok == False):
+        state, actions = fringe.pop()
+        for next_state, action, _ in problem.getSuccessors(state):
+            next_actions = actions + [action]
+            if problem.isGoalState(next_state):
+                ans = next_actions
+                ok = True
+            elif next_state not in closed:
+                state = [next_state, next_actions]
+                addState(fringe, closed, copy.deepcopy(state))
+    return ans
+
+# python pacman.py -l mediumDottedMaze -p StayEastSearchAgent
 def uniformCostSearch(problem: SearchProblem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
