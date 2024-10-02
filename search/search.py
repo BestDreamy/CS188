@@ -137,8 +137,27 @@ def breadthFirstSearch(problem: SearchProblem):
 # python pacman.py -l mediumDottedMaze -p StayEastSearchAgent
 def uniformCostSearch(problem: SearchProblem):
     """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    def addState(que: util.PriorityQueue, vis: dict, state: list):
+        que.push(state, state[2])
+        vis[state[0]] = True
+
+    fringe = util.PriorityQueue()
+    closed = {}
+    # state, actions, cost
+    state = [problem.getStartState(), [], 0]
+    addState(fringe, closed, copy.deepcopy(state))
+    ok = False
+    while (fringe.isEmpty() == False and ok == False):
+        state, actions, total_cost = fringe.pop()
+        for next_state, action, cost in problem.getSuccessors(state):
+            next_actions = actions + [action]
+            if problem.isGoalState(next_state):
+                ans = next_actions
+                ok = True
+            elif next_state not in closed:
+                state = [next_state, next_actions, total_cost + cost]
+                addState(fringe, closed, copy.deepcopy(state))
+    return ans
 
 def nullHeuristic(state, problem=None):
     """
@@ -149,9 +168,28 @@ def nullHeuristic(state, problem=None):
 
 def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    def addState(que: util.PriorityQueue, vis: dict, state: list):
+        que.push(state, state[2])
+        vis[state[0]] = True
 
+    fringe = util.PriorityQueue()
+    closed = {}
+    state = problem.getStartState()
+    # state, actions, cost
+    state = [state, [], heuristic(state, problem)]
+    addState(fringe, closed, copy.deepcopy(state))
+    ok = False
+    while (fringe.isEmpty() == False and ok == False):
+        state, actions, total_cost = fringe.pop()
+        for next_state, action, cost in problem.getSuccessors(state):
+            next_actions = actions + [action]
+            if problem.isGoalState(next_state):
+                ans = next_actions
+                ok = True
+            elif next_state not in closed:
+                state = [next_state, next_actions, total_cost + cost + heuristic(next_state, problem)]
+                addState(fringe, closed, copy.deepcopy(state))
+    return ans
 
 # Abbreviations
 bfs = breadthFirstSearch
