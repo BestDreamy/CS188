@@ -74,7 +74,6 @@ def tinyMazeSearch(problem):
     return  [s, s, w, s, w, w, s, w]
 
 # python autograder.py -q q1
-
 def depthFirstSearch(problem: SearchProblem):
     """
     Search the deepest nodes in the search tree first.
@@ -89,75 +88,88 @@ def depthFirstSearch(problem: SearchProblem):
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
-    def addState(stk: util.Stack, vis: dict, state: list):
-        stk.push(state)
-        vis[state[0]] = True
-
+    # def addState(stk: util.Stack, vis: dict, path: list):
+    #     stk.push(path)
+    #     vis.append(path[0])
+    #
+    # fringe = util.Stack()
+    # closed = []
+    # path = [problem.getStartState(), []]
+    # addState(fringe, closed, copy.deepcopy(path))
+    # ok = False
+    # while (fringe.isEmpty() == False and ok == False):
+    #     state, actions = fringe.pop()
+    #     for next_state, action, _ in problem.getSuccessors(state):
+    #         next_actions = actions + [action]
+    #         if problem.isGoalState(next_state):
+    #             ans = next_actions
+    #             ok = True
+    #             break
+    #         elif next_state not in closed:
+    #             state = [next_state, next_actions]
+    #             addState(fringe, closed, copy.deepcopy(state))
+    # return ans
+    #
     fringe = util.Stack()
-    closed = {}
-    state = [problem.getStartState(), []]
-    addState(fringe, closed, copy.deepcopy(state))
-    ok = False
-    while (fringe.isEmpty() == False and ok == False):
+    closed = []
+    fringe.push([problem.getStartState(), []])
+    while (fringe.isEmpty() == False):
         state, actions = fringe.pop()
+        if state in closed:
+            continue
+        else:
+            closed.append(state)
+
+        if problem.isGoalState(state):
+            return actions
+
         for next_state, action, _ in problem.getSuccessors(state):
             next_actions = actions + [action]
-            if problem.isGoalState(next_state):
-                ans = next_actions
-                ok = True
-            elif next_state not in closed:
-                state = [next_state, next_actions]
-                addState(fringe, closed, copy.deepcopy(state))
-    return ans
+            if next_state not in closed:
+                fringe.push([next_state, next_actions])
 
 # python pacman.py -l mediumMaze -p SearchAgent -a fn=bfs
 def breadthFirstSearch(problem: SearchProblem):
     """Search the shallowest nodes in the search tree first."""
-    def addState(que: util.Queue, vis: dict, state: list):
-        que.push(state)
-        vis[state[0]] = True
-
     fringe = util.Queue()
-    closed = {}
-    state = [problem.getStartState(), []]
-    addState(fringe, closed, copy.deepcopy(state))
-    ok = False
-    while (fringe.isEmpty() == False and ok == False):
+    closed = []
+    fringe.push([problem.getStartState(), []])
+    while (fringe.isEmpty() == False):
         state, actions = fringe.pop()
+        if state in closed:
+            continue
+        else:
+            closed.append(state)
+
+        if problem.isGoalState(state):
+            return actions
+
         for next_state, action, _ in problem.getSuccessors(state):
             next_actions = actions + [action]
-            if problem.isGoalState(next_state):
-                ans = next_actions
-                ok = True
-            elif next_state not in closed:
-                state = [next_state, next_actions]
-                addState(fringe, closed, copy.deepcopy(state))
-    return ans
+            if next_state not in closed:
+                fringe.push([next_state, next_actions])
+
 
 # python pacman.py -l mediumDottedMaze -p StayEastSearchAgent
 def uniformCostSearch(problem: SearchProblem):
     """Search the node of least total cost first."""
-    def addState(que: util.PriorityQueue, vis: dict, state: list):
-        que.push(state, state[2])
-        vis[state[0]] = True
-
     fringe = util.PriorityQueue()
-    closed = {}
-    # state, actions, cost
-    state = [problem.getStartState(), [], 0]
-    addState(fringe, closed, copy.deepcopy(state))
-    ok = False
-    while (fringe.isEmpty() == False and ok == False):
+    closed = []
+    fringe.push([problem.getStartState(), [], 0], 0)
+    while (fringe.isEmpty() == False):
         state, actions, total_cost = fringe.pop()
+        if state in closed:
+            continue
+        else:
+            closed.append(state)
+
+        if problem.isGoalState(state):
+            return actions
+
         for next_state, action, cost in problem.getSuccessors(state):
             next_actions = actions + [action]
-            if problem.isGoalState(next_state):
-                ans = next_actions
-                ok = True
-            elif next_state not in closed:
-                state = [next_state, next_actions, total_cost + cost]
-                addState(fringe, closed, copy.deepcopy(state))
-    return ans
+            if next_state not in closed:
+                fringe.push([next_state, next_actions, total_cost + cost], total_cost + cost)
 
 def nullHeuristic(state, problem=None):
     """
@@ -168,28 +180,25 @@ def nullHeuristic(state, problem=None):
 
 def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    def addState(que: util.PriorityQueue, vis: dict, state: list):
-        que.push(state, state[2])
-        vis[state[0]] = True
-
     fringe = util.PriorityQueue()
-    closed = {}
-    state = problem.getStartState()
-    # state, actions, cost
-    state = [state, [], heuristic(state, problem)]
-    addState(fringe, closed, copy.deepcopy(state))
-    ok = False
-    while (fringe.isEmpty() == False and ok == False):
+    closed = []
+    startState = problem.getStartState()
+    fringe.push([startState, [], heuristic(startState, problem)], heuristic(startState, problem))
+    while (fringe.isEmpty() == False):
         state, actions, total_cost = fringe.pop()
+        if state in closed:
+            continue
+        else:
+            closed.append(state)
+
+        if problem.isGoalState(state):
+            return actions
+
         for next_state, action, cost in problem.getSuccessors(state):
             next_actions = actions + [action]
-            if problem.isGoalState(next_state):
-                ans = next_actions
-                ok = True
-            elif next_state not in closed:
-                state = [next_state, next_actions, total_cost + cost + heuristic(next_state, problem)]
-                addState(fringe, closed, copy.deepcopy(state))
-    return ans
+            if next_state not in closed:
+                next_cost = total_cost + cost + heuristic(next_state, problem)
+                fringe.push([next_state, next_actions, total_cost + cost], next_cost)
 
 # Abbreviations
 bfs = breadthFirstSearch
